@@ -1,6 +1,9 @@
 :- use_module(library(pce)).
 :- use_module(library(process)).
 
+% XPCE home directory lister – version 1.0
+
+
 start :-
     % Find home directory
     expand_file_name('~', [HomeDir]),
