@@ -1,26 +1,22 @@
 :- use_module(library(pce)).
 :- use_module(library(process)).
 
-% XPCE home directory lister – version 1.0
-
-
 start :-
-    % Find home directory
-    expand_file_name('~', [HomeDir]),
+    new(D, dialog('Home Directory Listing')),
+    send(D, size, size(800, 600)),
 
-    % Run ls and capture stdout
-    process_create(path(ls), [HomeDir],
-                   [ stdout(pipe(Out)),
-                     process(PID)
-                   ]),
+    % Editor widget to show the directory listing
+    send(D, append, new(E, editor), below),
+
+    % Refresh button
+    send(D, append, button(refresh, message(@prolog, refresh, E))),
+
+    send(D, open),
+    refresh(E).
+
+refresh(Editor) :-
+    expand_file_name('~', [HomeDir]),
+    process_create(path(ls), [HomeDir], [stdout(pipe(Out))]),
     read_string(Out, _, Output),
     close(Out),
-
-    % XPCE window
-    new(D, dialog('Home Directory Listing')),
-    send(D, append, new(E, editor)),
-    send(E, contents, Output),
-    send(D, size, size(800, 600)),
-    send(D, open),
-
-    format('Spawned ls via PID ~w~n', [PID]).
+    send(Editor, contents, Output).
